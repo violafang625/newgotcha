@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>雙寶遊戲艙 (完美排版 + 神獸保存版)</title>
+  <style>
+    /* 基礎背景與字體 */
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #8A7B9D, #B5ACCC); color: #3D3B4F; margin: 0; padding: 15px; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; }
+    
+    /* 🌟 回歸您最愛的完美寬度比例 */
+    .game-container { width: 100%; max-width: 850px; background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(10px); padding: 20px; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); border: 3px solid #F4F3F6; margin-top: 10px; }
+
+    /* 雙寶切換頁籤 */
+    .user-tabs { display: flex; gap: 10px; margin-bottom: 20px; background: rgba(255,255,255,0.6); padding: 8px; border-radius: 15px; border: 3px solid #3D3B4F; }
+    .tab-btn { flex: 1; padding: 12px; border-radius: 10px; border: none; background: transparent; color: #8A7B9D; font-weight: bold; font-size: 18px; cursor: pointer; transition: 0.3s; }
+    .tab-btn.active { background: white; color: #3D3B4F; border: 3px solid #3D3B4F; box-shadow: 4px 4px 0px rgba(0,0,0,0.1); }
+
+    /* 模式切換 */
+    .mode-switcher { display: flex; gap: 10px; margin-bottom: 20px; }
+    .mode-btn { flex: 1; padding: 10px; border-radius: 12px; border: 3px solid #3D3B4F; background: white; font-weight: bold; color: #3D3B4F; cursor: pointer; box-shadow: 2px 2px 0px rgba(0,0,0,0.1); }
+    .mode-btn.active { background: #FFF1CD; }
+    
+    /* 狀態列 */
+    .top-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+    .title { font-size: 24px; font-weight: 900; color: #3D3B4F; margin: 0; flex-grow: 1; text-shadow: 1px 1px 0px #FFF; }
+    .status-pill { background: white; border: 3px solid #3D3B4F; padding: 5px 12px; border-radius: 20px; font-weight: bold; font-size: 14px; box-shadow: 2px 2px 0px rgba(0,0,0,0.1); }
+
+    /* 卡片與排版 🌟 強制左右並排不換行 */
+    .card { background: white; border: 3px solid #3D3B4F; border-radius: 20px; padding: 20px; box-shadow: 4px 4px 0px rgba(61, 59, 79, 0.15); margin-bottom: 15px; box-sizing: border-box; }
+    .panel { display: none; gap: 15px; flex-wrap: nowrap; } 
+    .panel.active { display: flex; }
+    /* 設定 min-width: 0 避免大圖片撐破版面 */
+    .left-panel { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; }
+    .right-panel { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
+    
+    /* 🌟 回歸完美高度的圖片區塊 */
+    .image-placeholder { width: 100%; height: 220px; background: radial-gradient(circle, #FFF1CD, #E2DFE9); border-radius: 15px; display: flex; align-items: center; justify-content: center; margin-bottom: 15px; border: 3px solid #3D3B4F; overflow: hidden; }
+    .progress-row { display: flex; width: 100%; gap: 10px; }
+    .progress-box { flex: 1; background: #F4F3F6; border: 2px solid #3D3B4F; border-radius: 12px; text-align: center; padding: 8px; }
+    .progress-number { font-size: 22px; font-weight: 900; color: #D96C75; }
+    .progress-text { font-size: 11px; font-weight: bold; }
+
+    .token-label { font-size: 12px; font-weight: bold; color: #D96C75; letter-spacing: 1px; }
+    .token-value { font-size: 40px; font-weight: 900; margin: 5px 0; color: #3D3B4F; }
+    
+    .btn-action { background: #D96C75; color: white; border: 3px solid #3D3B4F; border-radius: 12px; padding: 15px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0px 4px 0px #3D3B4F; width: 100%; margin-bottom: 10px; transition: 0.1s; }
+    .btn-action:active { transform: translateY(4px); box-shadow: 0px 0px 0px #3D3B4F; }
+    .btn-book { background: #8A7B9D; }
+
+    /* 控制台任務按鈕 */
+    .parent-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; width: 100%; }
+    .btn-add { background: #8A7B9D; color: white; border: 3px solid #3D3B4F; border-radius: 10px; padding: 12px 8px; font-size: 14px; font-weight: bold; cursor: pointer; box-shadow: 0px 3px 0px #3D3B4F; transition: 0.1s; }
+    .btn-add:active { transform: translateY(3px); box-shadow: 0px 0px 0px #3D3B4F; }
+    .btn-minus { background: #D96C75; }
+
+    /* 互動視窗 (抽卡 / 圖鑑 / 升級) */
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); z-index: 100; justify-content: center; align-items: center; flex-direction: column; padding: 20px; box-sizing: border-box; }
+    .modal-overlay.active { display: flex; }
+    
+    /* 翻卡特效 */
+    .flip-card { width: 260px; height: 380px; perspective: 1000px; cursor: pointer; margin-bottom: 20px; }
+    .flip-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.8s; transform-style: preserve-3d; }
+    .flip-card.is-flipped .flip-card-inner { transform: rotateY(180deg); }
+    .flip-card-front, .flip-card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 20px; border: 4px solid #3D3B4F; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+    .flip-card-front { background: repeating-linear-gradient(45deg, #8A7B9D, #8A7B9D 10px, #9B90B2 10px, #9B90B2 20px); border: 8px solid #FFF; }
+    .pokeball-logo { width: 60px; height: 60px; background: white; border-radius: 50%; border: 4px solid #3D3B4F; }
+    .flip-card-back { background: #FFF; transform: rotateY(180deg); padding: 15px; justify-content: flex-start; }
+    .card-img-bg { background: radial-gradient(circle, #FFF1CD, #F4F3F6); width: 100%; height: 150px; border-radius: 12px; display: flex; justify-content: center; align-items: center; margin-bottom: 10px; border: 2px solid #3D3B4F; }
+    .card-img { max-height: 120px; filter: drop-shadow(0px 5px 5px rgba(0,0,0,0.3)); }
+    .skill-box { background: #F4F3F6; border: 2px dashed #8A7B9D; border-radius: 10px; padding: 10px; width: 100%; box-sizing: border-box; text-align: left; }
+    
+    /* 圖鑑與升級面板 */
+    .album-modal { display: flex; position: relative; width: 100%; max-width: 650px; min-height: 480px; max-height: 85vh; background: #FFF; border: 4px solid #3D3B4F; border-radius: 20px; z-index: 101; flex-direction: column; box-shadow: 0 20px 40px rgba(0,0,0,0.4); overflow: hidden; }
+    #albumHome { display: flex; flex-direction: column; width: 100%; height: 100%; flex-grow: 1; }
+    .album-header { background: #8A7B9D; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+    .album-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 15px; padding: 20px; overflow-y: auto; background: #F4F3F6; flex-grow: 1; align-content: start; }
+    
+    .album-item { background: white; border: 3px solid #3D3B4F; border-radius: 12px; display: flex; flex-direction: column; align-items: center; padding: 10px; text-align: center; cursor: pointer; transition: 0.2s; position: relative; }
+    .album-item:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+    .album-item img { height: 70px; margin-bottom: 5px; }
+    .lv-badge { position: absolute; top: -10px; right: -10px; background: #FFD700; border: 2px solid #3D3B4F; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: bold; }
+
+    .upgrade-panel { display: none; width: 100%; height: 100%; background: white; flex-direction: column; box-sizing: border-box; flex-grow: 1; }
+    .upgrade-header { background: #3D3B4F; color: white; padding: 15px; text-align: center; font-size: 18px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+    .upgrade-content { padding: 20px; overflow-y: auto; text-align: center; display: flex; flex-direction: column; align-items: center; flex-grow: 1; }
+    .upgrade-skill-card { background: #F4F3F6; border: 3px solid #8A7B9D; border-radius: 15px; padding: 15px; margin: 15px 0; width: 100%; max-width: 400px; text-align: left; }
+    .btn-upgrade { background: #FFD700; color: #3D3B4F; border: 3px solid #3D3B4F; border-radius: 12px; padding: 12px 20px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0px 4px 0px #3D3B4F; margin-top: 10px; }
+    .btn-upgrade:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; transform: translateY(4px); }
+  </style>
+</head>
+<body>
+
+  <div class="game-container">
+    
+    <div class="user-tabs">
+      <button class="tab-btn active" id="tab-child1" onclick="switchUser('child1')">👦 大寶Max</button>
+      <button class="tab-btn" id="tab-child2" onclick="switchUser('child2')">👧 二寶Anna</button>
+    </div>
+
+    <div class="mode-switcher">
+      <button class="mode-btn active" id="btnStudent" onclick="switchMode('student')">🎮 遊戲艙</button>
+      <button class="mode-btn" id="btnParent" onclick="switchMode('parent')">⚙️ 控制台</button>
+    </div>
+
+    <div class="top-bar">
+      <h1 class="title" id="pageTitle">Max的遊戲艙</h1>
+      <div class="status-pill" id="topCoinDisplay">0 代幣</div>
+    </div>
+
+    <div id="studentPanel" class="panel active">
+      <div class="card left-panel">
+        <div class="image-placeholder">
+          <img id="gachaImage" src="" style="width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0px 10px 10px rgba(0,0,0,0.2));">
+        </div>
+        <div class="progress-row">
+          <div class="progress-box"><div class="progress-number" id="gachaCount">0</div><div class="progress-text">累計抽卡</div></div>
+          <div class="progress-box"><div class="progress-number" id="collectionCount">0</div><div class="progress-text">圖鑑數</div></div>
+        </div>
+      </div>
+
+      <div class="card right-panel">
+        <div class="token-label">TOKEN READY</div>
+        <div class="token-value" id="mainCoinDisplay">0</div>
+        <p style="font-size: 14px; color: #666; margin-bottom: 15px; font-weight: bold;">使用代幣抽取寶可夢！<br>在收集冊中還可以花點數將卡牌能力升級喔！</p>
+        <button class="btn-action" onclick="drawCard()">🃏 抽取寶可夢 (扣 50 點)</button>
+        <button class="btn-action btn-book" onclick="openAlbum()">📖 打開收集冊 (升級技能)</button>
+      </div>
+    </div>
+
+    <div id="parentPanel" class="panel">
+      <div class="card" style="width: 100%;">
+        <h3 style="margin-top: 0; color: #8A7B9D;">發放代幣給：<span id="targetName">大寶</span></h3>
+        <div class="parent-grid">
+          <button class="btn-add" onclick="addPoints(5)">🧹 主動做家事 (+5)</button>
+          <button class="btn-add" onclick="addPoints(5)">📚 認真完成功課 (+5)</button>
+          <button class="btn-add" onclick="addPoints(5)">🐈 完成讀經班功課 (+5)</button>
+          <button class="btn-add" onclick="addPoints(10)">🛏️ 唸英文 (+10)</button>
+          <button class="btn-add" onclick="addPoints(5)">🛵 閱讀 (+5)</button>
+          <button class="btn-add" onclick="addPoints(5)">✨ 今日事今日畢 (+5)</button>
+          <button class="btn-add" onclick="addPoints(5)">✨ 說好話、不吵架 (+5)</button>
+          <button class="btn-add btn-minus" onclick="addPoints(-5)">扣除代幣 (-5)</button>
+        </div>
+        <div style="margin-top: 15px; padding: 10px; background: #F4F3F6; border-radius: 10px; font-size: 13px; font-weight: bold; color: #8A7B9D;" id="systemLog">系統紀錄：準備就緒...</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="drawModal">
+    <h2 style="color: white; margin-bottom: 20px; text-shadow: 2px 2px 4px #000;" id="clickHint">✨ 點擊卡牌翻開 ✨</h2>
+    <div class="flip-card" id="flipCard" onclick="flipTheCard()">
+      <div class="flip-card-inner">
+        <div class="flip-card-front"><div class="pokeball-logo"></div></div>
+        <div class="flip-card-back">
+          <div class="card-img-bg"><img id="resultImg" class="card-img" src=""></div>
+          <h2 style="margin: 5px 0; color: #3D3B4F;" id="resultName">寶可夢</h2>
+          <div class="skill-box">
+            <div style="font-size: 14px; font-weight: bold; color: #8A7B9D;">⚔️ 初始技能：<span id="resultSkillName">技能名</span></div>
+            <div style="font-size: 13px; font-weight: bold; color: #5D576B; margin-top: 5px;" id="resultSkillDesc">說明</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button class="btn-action" style="width: 200px; display: none;" id="closeDrawBtn" onclick="closeDrawModal()">收入圖鑑</button>
+  </div>
+
+  <div class="modal-overlay" id="albumOverlay">
+    <div class="album-modal">
+      <div id="albumHome">
+        <div class="album-header">
+          <h3 style="margin: 0;" id="albumTitle">大寶的收集冊</h3>
+          <button style="background: white; border: 2px solid #3D3B4F; padding: 5px 15px; border-radius: 8px; cursor: pointer; font-weight: bold;" onclick="closeAlbum()">關閉</button>
+        </div>
+        <div class="album-grid" id="albumGrid"></div>
+      </div>
+
+      <div class="upgrade-panel" id="upgradePanel">
+        <div class="upgrade-header">
+          <button style="background: transparent; border: none; color: white; font-size: 16px; cursor: pointer; font-weight: bold;" onclick="backToAlbum()">◀ 返回圖鑑</button>
+          <span id="upgTitle">進化面板</span>
+          <div style="width: 80px;"></div>
+        </div>
+        <div class="upgrade-content">
+          <img id="upgImg" style="height: 120px; filter: drop-shadow(0px 5px 5px rgba(0,0,0,0.2)); margin-bottom: 10px;" src="">
+          <h2 style="margin: 0; color: #3D3B4F;" id="upgName">寶可夢</h2>
+          <div class="upgrade-skill-card">
+            <div style="color: #8A7B9D; font-weight: bold; font-size: 14px; margin-bottom: 5px;">目前等級能力：</div>
+            <div style="font-size: 18px; font-weight: 900; color: #3D3B4F;" id="upgCurrentSkill">技能 Lv.1</div>
+            <div style="font-size: 14px; font-weight: bold; color: #666; margin-top: 5px;" id="upgCurrentDesc">效果說明</div>
+          </div>
+          <div id="upgradeActionBox" style="width: 100%; max-width: 400px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 💥 完美包含所有頂級神獸在內的 50 隻寶可夢完整資料庫！
+    const pokemonDB = {
+      'arceus': { id: 'arceus', name: '阿爾宙斯', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/493.png', skills: [ { level: 1, name: '創世之光 Lv.1', desc: '神之造物主！發動可獲得【無條件免除一週所有繁瑣家事】。', cost: 0 }, { level: 2, name: '宇宙審判 Lv.Max', desc: '終極願望！可以跟媽媽兌換一個價值 500 元以內的特製大禮物！', cost: 800 } ] },
+      'rayquaza': { id: 'rayquaza', name: '烈空坐', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/384.png', skills: [ { level: 1, name: '神速 Lv.1', desc: '只要今天在學校就把功課寫完，回家立刻額外獲得 50 代幣。', cost: 0 }, { level: 2, name: '畫龍點睛 Lv.Max', desc: '天空主宰！可以兌換去文具店親自挑選一個喜歡的模型或盲盒。', cost: 600 } ] },
+      'dialga': { id: 'dialga', name: '帝牙盧卡', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/483.png', skills: [ { level: 1, name: '時間咆哮 Lv.1', desc: '時空暫停！看電視或打平板的休閒時間可以【當場延長 30 分鐘】。', cost: 0 }, { level: 2, name: '時空逆轉 Lv.Max', desc: '時間掌控者！今天的所有未完成功課或家事可以移到明天再做。', cost: 500 } ] },
+      'groudon': { id: 'groudon', name: '固拉多', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/383.png', skills: [ { level: 1, name: '斷崖之劍 Lv.1', desc: '大地之力！今天只要主動幫忙鏟貓砂，獲得的點數直接翻倍。', cost: 0 }, { level: 2, name: '終結之地 Lv.Max', desc: '全家今天出去聚餐時，你可以主導指定一家你最想吃的餐廳！', cost: 400 } ] },
+      'kyogre': { id: 'kyogre', name: '蓋歐卡', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/382.png', skills: [ { level: 1, name: '根源波動 Lv.1', desc: '海洋召喚！可以要求今天洗澡泡澡延長 30 分鐘，盡情玩水玩具。', cost: 0 }, { level: 2, name: '始源之海 Lv.Max', desc: '這個週末的行程，全家必須一起去游泳池、海邊或水上樂園玩！', cost: 500 } ] },
+      'palkia': { id: 'palkia', name: '帕路奇亞', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/484.png', skills: [ { level: 1, name: '亞空裂斬 Lv.1', desc: '空間粉碎！可以得到一次「免除聽媽媽碎碎念」的隱形護盾金牌。', cost: 0 }, { level: 2, name: '空間重組 Lv.Max', desc: '你可以自由規劃自己的房間布置，或者是買一件新衣服、新鞋子。', cost: 400 } ] },
+      'giratina': { id: 'giratina', name: '騎拉帝歐', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/487.png', skills: [ { level: 1, name: '潛靈奇襲 Lv.1', desc: '幽靈潛行！遇到不想吃的青菜或食物時，可以用此卡少吃兩口。', cost: 0 }, { level: 2, name: '反轉世界 Lv.Max', desc: '命運交替！今天可以指定爸爸或媽媽幫你跑腿或拿一次東西。', cost: 500 } ] },
+      'zekrom': { id: 'zekrom', name: '捷克羅姆', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/644.png', skills: [ { level: 1, name: '雷擊 Lv.1', desc: '理想之雷！玩 Switch 或平板的遊戲時間直接增加 20 分鐘。', cost: 0 }, { level: 2, name: '交錯閃電 Lv.Max', desc: '可以跟家長兌換一組全新的貼紙、文具或是精美卡牌一包。', cost: 450 } ] },
+      'ho_oh': { id: 'ho_oh', name: '鳳王', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/250.png', skills: [ { level: 1, name: '神聖之火 Lv.1', desc: '浴火重生！如果今天不小心犯錯被扣點數，此卡能將罰金減半。', cost: 0 }, { level: 2, name: '聖灰復甦 Lv.Max', desc: '奇蹟降臨！今天如果想多喝一罐飲料或多吃冰棒，可以跟媽媽換。', cost: 400 } ] },
+     'bulbasaur': { id: 'bulbasaur', name: '妙蛙種子', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1.png', skills: [ { level: 1, name: '藤鞭', desc: '草系環保大師！下次做家事任務時，獲得的代幣獎勵多 5 枚。', cost: 0 }, { level: 2, name: '日光束', desc: '連續一週主動維持房間整潔，可兌換一組精美小文具。', cost: 80 } ] },
+      'charmander': { id: 'charmander', name: '小火龍', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/4.png', skills: [ { level: 1, name: '抓', desc: '熱心幫忙！幫家長搥背 5 分鐘可獲得 10 代幣。', cost: 0 }, { level: 2, name: '火焰旋渦', desc: '溫暖的火光！今晚的洗澡水可以自己決定要放什麼泡泡浴。', cost: 70 } ] },
+      'charizard': { id: 'charizard', name: '噴火龍', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/6.png', skills: [ { level: 1, name: '火花', desc: '可抵免一次小型家事。', cost: 0 }, { level: 2, name: '噴射火焰', desc: '抵免一次家事，並可獲得一份麥當勞快樂兒童餐！', cost: 150 } ] },
+      'squirtle': { id: 'squirtle', name: '傑尼龜', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/7.png', skills: [ { level: 1, name: '縮入殼中', desc: '防禦狀態！如果今天被唸，可以有一分鐘的「安靜免疫權」。', cost: 0 }, { level: 2, name: '水槍', desc: '清涼一夏！可向家長兌換吃一支冰棒或冰淇淋。', cost: 60 } ] },
+      'blastoise': { id: 'blastoise', name: '水箭龜', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/9.png', skills: [ { level: 1, name: '水之波動', desc: '洗澡時間延長！今晚可以多玩水 15 分鐘。', cost: 0 }, { level: 2, name: '水炮', desc: '歡樂水世界！可以指定週末去游泳池、海邊或玩水。', cost: 200 } ] },
+      'pikachu': { id: 'pikachu', name: '皮卡丘', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/25.png', skills: [ { level: 1, name: '電擊', desc: '可兌換【額外 15 分鐘】的電視或遊戲時間。', cost: 0 }, { level: 2, name: '十萬伏特', desc: '搭乘 Gogoro 一起去附近兜風吃點心！', cost: 120 } ] },
+      'jigglypuff': { id: 'jigglypuff', name: '胖丁', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/39.png', skills: [ { level: 1, name: '唱歌', desc: '睡前點歌！可以要求家長唱一首歌或播喜歡的音樂。', cost: 0 }, { level: 2, name: '魅惑之聲', desc: '獲得晚安特權，今晚可以晚 30 分鐘上床睡覺。', cost: 120 } ] },
+      'meowth': { id: 'meowth', name: '喵喵', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/52.png', skills: [ { level: 1, name: '虛張聲勢', desc: '獲得一次免做家事的機會。', cost: 0 }, { level: 2, name: '聚寶功', desc: '招財貓發威！立刻從系統中額外獲得 50 枚代幣。', cost: 100 } ] },
+      'psyduck': { id: 'psyduck', name: '可達鴨', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/54.png', skills: [ { level: 1, name: '發呆', desc: '獲得 15 分鐘的「完全放空時間」，任何人不能打擾。', cost: 0 }, { level: 2, name: '念力', desc: '不小心忘記了！可以抵銷一次因為犯錯而被扣除的代幣。', cost: 80 } ] },
+      'growlithe': { id: 'growlithe', name: '卡蒂狗', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/58.png', skills: [ { level: 1, name: '咬住', desc: '肚子餓了！可立刻獲得一份小餅乾或水果。', cost: 0 }, { level: 2, name: '神速', desc: '免走路特權！下一次出門時可以要求坐機車代步。', cost: 90 } ] },
+      'machamp': { id: 'machamp', name: '怪力', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/68.png', skills: [ { level: 1, name: '空手劈', desc: '展現力氣！主動幫忙提重物，可額外獲得 10 代幣。', cost: 0 }, { level: 2, name: '爆裂拳', desc: '超級苦力！自願幫家長搥背按摩 10 分鐘，可獲得 50 代幣。', cost: 60 } ] },
+      'slowpoke': { id: 'slowpoke', name: '呆呆獸', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/79.png', skills: [ { level: 1, name: '哈欠', desc: '累了～可以選擇一項今天的家事延後到明天再做。', cost: 0 }, { level: 2, name: '瞬間失憶', desc: '消除碎碎念！家長必須立刻停止唸人一次。', cost: 110 } ] },
+      'gengar': { id: 'gengar', name: '耿鬼', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/94.png', skills: [ { level: 1, name: '暗影潛行', desc: '隱形特權！可以免除一次突發性的小指派。', cost: 0 }, { level: 2, name: '黑夜魔影', desc: '可指定爸爸或媽媽在睡前講一個精彩的故事或玩桌遊。', cost: 100 } ] },
+      'chansey': { id: 'chansey', name: '吉利蛋', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/113.png', skills: [ { level: 1, name: '生蛋', desc: '幸運降臨！下一次抽卡時，家長無條件贊助 10 代幣。', cost: 0 }, { level: 2, name: '治癒波動', desc: '超級急救！如果你被扣點數，這張卡可以幫你補回 30 點。', cost: 150 } ] },
+      'magikarp': { id: 'magikarp', name: '鯉魚王', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/129.png', skills: [ { level: 1, name: '躍起', desc: '什麼事都沒發生... 但你可以要求家長誇獎你一句話。', cost: 0 }, { level: 2, name: '抓狂', desc: '鯉魚王的逆襲！獲得一顆喜歡的糖果或巧克力。', cost: 30 } ] },
+      'gyarados': { id: 'gyarados', name: '暴鯉龍', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/130.png', skills: [ { level: 1, name: '咬碎', desc: '破壞力驚人！可以直接取消一項不喜歡的蔬菜不吃。', cost: 0 }, { level: 2, name: '破壞光線', desc: '震撼全場！大聲宣佈今晚的電視遙控器由你掌管 1 小時！', cost: 200 } ] },
+      'lapras': { id: 'lapras', name: '拉普拉斯', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/131.png', skills: [ { level: 1, name: '水之波動', desc: '獲得泡澡特權，今晚可以玩水泡澡 30 分鐘！', cost: 0 }, { level: 2, name: '衝浪', desc: '帶我去兜風！指定這個週末全家一起去公園或戶外走走。', cost: 180 } ] },
+      'ditto': { id: 'ditto', name: '百變怪', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/132.png', skills: [ { level: 1, name: '變身', desc: '變身兄弟姊妹！要求他們幫你跑腿一次（如拿衛生紙）。', cost: 0 }, { level: 2, name: '超級變身', desc: '複製貼上！免費複製對方圖鑑裡的一個 Lv.Max 技能來用！', cost: 250 } ] },
+      'eevee': { id: 'eevee', name: '伊布', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/133.png', skills: [ { level: 1, name: '渴望', desc: '可立即獲得挑選一份日常小點心的權利。', cost: 0 }, { level: 2, name: '適應力', desc: '獲得指定點一杯手搖飲的特權！', cost: 120 } ] },
+      'vaporeon': { id: 'vaporeon', name: '水伊布', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/134.png', skills: [ { level: 1, name: '溶化', desc: '像水一樣溜走～成功閃避一次洗碗或收拾餐桌的任務。', cost: 0 }, { level: 2, name: '濁流', desc: '獲得一杯清涼的果汁或氣泡水！', cost: 80 } ] },
+      'jolteon': { id: 'jolteon', name: '雷伊布', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/135.png', skills: [ { level: 1, name: '電光一閃', desc: '速度大增！如果 10 分鐘內收好玩具，額外獲 15 代幣。', cost: 0 }, { level: 2, name: '打雷', desc: '電力爆發！直接兌換 40 分鐘的平板遊戲時間。', cost: 130 } ] },
+      'flareon': { id: 'flareon', name: '火伊布', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/136.png', skills: [ { level: 1, name: '火花', desc: '暖暖的！可以要求家長給你一個長達 30 秒的超級擁抱。', cost: 0 }, { level: 2, name: '大字爆炎', desc: '熱情如火！獲得一份熱騰騰的炸物點心（如薯條或雞塊）。', cost: 140 } ] },
+      'articuno': { id: 'articuno', name: '急凍鳥', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/144.png', skills: [ { level: 1, name: '冰礫', desc: '天氣太熱了，立刻兌換一塊冰涼的西瓜或水果。', cost: 0 }, { level: 2, name: '暴風雪', desc: '冰雪世界！週末可以去吃一碗好吃的剉冰或雪花冰！', cost: 160 } ] },
+      'zapdos': { id: 'zapdos', name: '閃電鳥', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/145.png', skills: [ { level: 1, name: '充電', desc: '精力充沛！今天的就寢時間可以往後延 20 分鐘。', cost: 0 }, { level: 2, name: '十萬伏特', desc: '超級電影夜！週末可以挑選一部電影，全家配爆米花看！', cost: 200 } ] },
+      'moltres': { id: 'moltres', name: '火焰鳥', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/146.png', skills: [ { level: 1, name: '火焰旋渦', desc: '家事加倍！主動倒垃圾或拖地，獲得雙倍代幣。', cost: 0 }, { level: 2, name: '神鳥猛擊', desc: '火力全開！獲得一次指定週末吃火鍋或燒肉的超級特權！', cost: 250 } ] },
+      'dragonite': { id: 'dragonite', name: '快龍', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/149.png', skills: [ { level: 1, name: '龍捲風', desc: '房間亂糟糟？發動此技能，家長會幫你一起收房間 10 分鐘。', cost: 0 }, { level: 2, name: '逆鱗', desc: '發洩一下！獲得去湯姆熊或遊樂場的 150 元代幣額度！', cost: 300 } ] },
+      'mewtwo': { id: 'mewtwo', name: '超夢', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/150.png', skills: [ { level: 1, name: '精神強念', desc: '霸氣外漏！可以免除今日所有被指派的家事任務。', cost: 0 }, { level: 2, name: '精神擊破', desc: '終極特權！要求全家週末去指定外縣市玩！', cost: 500 } ] },
+      'mew': { id: 'mew', name: '夢幻', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/151.png', skills: [ { level: 1, name: '變身', desc: '神秘複製！可以自由複製任何一張自己已擁有卡片的 Lv.1 技能。', cost: 0 }, { level: 2, name: '起源之光', desc: '奇蹟發生！可向家長提出一個非金錢類的特別願望。', cost: 300 } ] },
+      'chikorita': { id: 'chikorita', name: '菊草葉', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/152.png', skills: [ { level: 1, name: '飛葉快刀', desc: '幫忙修剪植物或澆水，可獲得 15 代幣。', cost: 0 }, { level: 2, name: '光合作用', desc: '去外面曬太陽！指定去公園騎腳踏車或玩溜滑梯。', cost: 100 } ] },
+      'cyndaquil': { id: 'cyndaquil', name: '火球鼠', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/155.png', skills: [ { level: 1, name: '煙幕', desc: '趁亂逃跑！遇到不想吃的菜可以少吃兩口。', cost: 0 }, { level: 2, name: '噴射火焰', desc: '獲得買一包喜歡的餅乾或零食的權利。', cost: 90 } ] },
+      'totodile': { id: 'totodile', name: '小鋸鱷', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/158.png', skills: [ { level: 1, name: '咬住', desc: '牙齒很利！今晚晚餐可以點名要吃肉類（牛排/炸雞）。', cost: 0 }, { level: 2, name: '水炮', desc: '獲得去便利商店挑選一瓶喜歡的飲料的特權。', cost: 70 } ] },
+      'togepi': { id: 'togepi', name: '波克比', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/175.png', skills: [ { level: 1, name: '撒嬌', desc: '發動撒嬌攻勢，要求家長背你或抱你走到房間。', cost: 0 }, { level: 2, name: '揮指', desc: '隨機驚喜！家長必須準備一個 50 元以內的小驚喜禮物。', cost: 150 } ] },
+      'umbreon': { id: 'umbreon', name: '月亮伊布', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/197.png', skills: [ { level: 1, name: '奇異光線', desc: '今晚可以決定房間要開小夜燈還是全暗睡覺。', cost: 0 }, { level: 2, name: '月光', desc: '黑夜王者！週末晚上可以熬夜多玩 45 分鐘再睡覺！', cost: 160 } ] },
+      'espeon': { id: 'espeon', name: '太陽伊布', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/196.png', skills: [ { level: 1, name: '預知未來', desc: '提前知道明天早餐，如果不喜歡可以換一次。', cost: 0 }, { level: 2, name: '晨光', desc: '早晨活力！假日早上可以指定去喜歡的早餐店吃早餐。', cost: 130 } ] },
+      'wobbuffet': { id: 'wobbuffet', name: '果然翁', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/202.png', skills: [ { level: 1, name: '忍耐', desc: '如果今天乖乖不生氣、不吵架，晚上結算多加 15 代幣。', cost: 0 }, { level: 2, name: '雙倍奉還', desc: '神級反彈！把你不想做的一件家事，反彈給爸爸或媽媽做！', cost: 200 } ] },
+      'lugia': { id: 'lugia', name: '洛奇亞', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/249.png', skills: [ { level: 1, name: '起風', desc: '吹走煩惱！今天可以無條件少寫一張評量或測驗卷。', cost: 0 }, { level: 2, name: '氣旋攻擊', desc: '海之神！要求全家規劃一次兩天一夜的外縣市小旅行！', cost: 800 } ] },
+      'ho_oh': { id: 'ho_oh', name: '鳳王', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/250.png', skills: [ { level: 1, name: '神聖之火', desc: '幸運之光！今天如果被扣分，此卡可以讓扣分減半。', cost: 0 }, { level: 2, name: '自我再生', desc: '浴火重生！獲得挑選一件新衣服或新鞋子的特權！', cost: 600 } ] },
+      'celebi': { id: 'celebi', name: '時拉比', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/251.png', skills: [ { level: 1, name: '治癒鈴聲', desc: '叮噹～洗滌心靈！獲得免挨罵金牌一次（限小錯）。', cost: 0 }, { level: 2, name: '時光漫遊', desc: '時光倒流！把今天已經用掉的遊戲時間，再增加 30 分鐘！', cost: 200 } ] },
+      'mudkip': { id: 'mudkip', name: '水躍魚', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/258.png', skills: [ { level: 1, name: '玩泥巴', desc: '今天可以弄髒衣服去玩沙或去公園跑跳，家長不能唸！', cost: 0 }, { level: 2, name: '衝浪', desc: '去兜風！指定週末去戶外大草皮奔跑。', cost: 110 } ] },
+      'rayquaza': { id: 'rayquaza', name: '烈空坐', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/384.png', skills: [ { level: 1, name: '神速', desc: '如果今天作業在學校就寫完，回家立刻發放 50 代幣！', cost: 0 }, { level: 2, name: '畫龍點睛', desc: '天空霸主！獲得購買一個價值 500 元以內大玩具的超級特權！', cost: 800 } ] },
+      'piplup': { id: 'piplup', name: '波加曼', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/393.png', skills: [ { level: 1, name: '啄', desc: '小點心時間！可以獲得一個布丁或果凍。', cost: 0 }, { level: 2, name: '泡沫光線', desc: '可以買一罐喜歡的泡泡水去公園吹泡泡！', cost: 80 } ] },
+      'lucario': { id: 'lucario', name: '路卡利歐', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/448.png', skills: [ { level: 1, name: '波導彈', desc: '精準命中！可以直接指定明天便當裡的一道菜。', cost: 0 }, { level: 2, name: '近身戰', desc: '武術大師！跟家長進行一場枕頭大戰或摔角遊戲 15 分鐘！', cost: 100 } ] },
+      'garchomp': { id: 'garchomp', name: '烈咬陸鯊', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/445.png', skills: [ { level: 1, name: '流沙地獄', desc: '困住家長！家長必須放下手機專心陪你玩 20 分鐘。', cost: 0 }, { level: 2, name: '龍之俯衝', desc: '超強氣勢！去夜市時可以獲得 100 元的玩遊戲額度！', cost: 250 } ] },
+      'greninja': { id: 'greninja', name: '甲賀忍蛙', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/658.png', skills: [ { level: 1, name: '影子分身', desc: '神速洗澡！15分鐘內洗完澡穿好衣服，可額外獲 10 代幣。', cost: 0 }, { level: 2, name: '飛水忍鏢', desc: '效率大師！功課下午5點前完成，晚上自由時間增加 30 分鐘。', cost: 120 } ] },
+      'litten': { id: 'litten', name: '火斑喵', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/725.png', skills: [ { level: 1, name: '火花', desc: '獲得專屬撸貓時間 15 分鐘，盡情跟家裡的貓咪玩耍！', cost: 0 }, { level: 2, name: '閃焰衝鋒', desc: '跟家長去寵物店，幫家裡的貓咪挑選一個新罐頭或玩具。', cost: 100 } ] },
+      'mimikyu': { id: 'mimikyu', name: '謎擬Q', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/778.png', skills: [ { level: 1, name: '畫皮', desc: '替身防禦！抵銷一次不想吃的食物（例如青椒或胡蘿蔔）。', cost: 0 }, { level: 2, name: '嬉鬧', desc: '化裝舞會！可以買一個可愛的小吊飾或轉一次扭蛋。', cost: 100 } ] },
+      'scorbunny': { id: 'scorbunny', name: '炎兔兒', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/815.png', skills: [ { level: 1, name: '蓄能焰襲', desc: '活力滿點！週末可以去體育館或公園盡情運動跑跳。', cost: 0 }, { level: 2, name: '火焰球', desc: '獲得一套新的運動襪或是小體育用品！', cost: 150 } ] },
+      'sprigatito': { id: 'sprigatito', name: '新葉喵', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1006.png', skills: [ { level: 1, name: '樹葉', desc: '自帶香氣～今天洗澡可以選喜歡的沐浴乳味道。', cost: 0 }, { level: 2, name: '千變萬花', desc: '魔術秀！可以要求買一本喜歡的課外讀物或繪本。', cost: 120 } ] },
+      'fuecoco': { id: 'fuecoco', name: '呆火鱷', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1009.png', skills: [ { level: 1, name: '火花', desc: '吃貨屬性！獲得一包喜歡的洋芋片或零嘴。', cost: 0 }, { level: 2, name: '閃焰高歌', desc: 'KTV之王！週末可以在家拿麥克風大聲唱歌半小時！', cost: 100 } ] },
+      'quaxly': { id: 'quaxly', name: '潤水鴨', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/1012.png', skills: [ { level: 1, name: '水槍', desc: '愛乾淨！主動把自己的鞋子刷洗乾淨，可獲得 20 代幣。', cost: 0 }, { level: 2, name: '流水步', desc: '水上漫步！指定下雨天全家一起穿雨衣雨鞋出去踩水坑！', cost: 110 } ] }
+    };
+
+    // 🔒 關鍵修復：優先從瀏覽器磁碟讀取歷史資料，若沒有才初始化為 0
+    let users = JSON.parse(localStorage.getItem('pokemonGameData_v2')) || {
+      'child1': { name: 'Max', coins: 0, pulls: 0, cards: {} }, 
+      'child2': { name: 'Anna', coins: 0, pulls: 0, cards: {} }
+    };
+    
+    let currentUser = 'child1';
+    let currentViewCardId = null; 
+    let isFlipping = false;
+
+    // 💾 自動儲存資料至本機的防歸零防線
+    function saveGameData() {
+      localStorage.setItem('pokemonGameData_v2', JSON.stringify(users));
+    }
+
+    // 🌟 雙寶切換魔法與動態換圖
+    function switchUser(userId) {
+      currentUser = userId;
+      document.getElementById('tab-child1').classList.toggle('active', userId === 'child1');
+      document.getElementById('tab-child2').classList.toggle('active', userId === 'child2');
+      document.getElementById('pageTitle').innerText = users[userId].name + '的遊戲艙';
+      document.getElementById('targetName').innerText = users[userId].name;
+
+      // ⭐ 請把這裡的網址，換成您的扭蛋機跟仙子伊布！
+      const gachaImg = document.getElementById('gachaImage');
+      if (userId === 'child1') {
+        // 大寶 Max 的專屬圖片 (可愛扭蛋機或可達鴨)
+        gachaImg.src = "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExZGlyMHFwMDg5aXhmZnlnMzhnMXc3aXA5ZHBreGt4a3R1eHpnc2swNiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/gL5S4YWV9uwhvH33Re/giphy.gif"; 
+      } else if (userId === 'child2') {
+        // 二寶 Anna 的專屬圖片 (仙子伊布)
+        gachaImg.src = "https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExeWh3MHV3M3kxa3B1OTRlaHl5dXR2OGxrZzF1NWwxdXA0emRkY2E0NCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/u8i2dfU1NbhDO/giphy.gif";
+      }
+
+      updateUI();
+    }
+
+    function switchMode(mode) {
+      document.getElementById('studentPanel').classList.toggle('active', mode === 'student');
+      document.getElementById('parentPanel').classList.toggle('active', mode === 'parent');
+      document.getElementById('btnStudent').classList.toggle('active', mode === 'student');
+      document.getElementById('btnParent').classList.toggle('active', mode === 'parent');
+    }
+
+    function updateUI() {
+      const data = users[currentUser];
+      document.getElementById('topCoinDisplay').innerText = data.coins + ' 代幣';
+      document.getElementById('mainCoinDisplay').innerText = data.coins;
+      document.getElementById('gachaCount').innerText = data.pulls;
+      document.getElementById('collectionCount').innerText = Object.keys(data.cards).length;
+    }
+
+    function addPoints(pts) {
+      users[currentUser].coins = Math.max(0, users[currentUser].coins + pts);
+      updateUI();
+      saveGameData(); 
+      let action = pts > 0 ? `發放了 ${pts} 代幣` : `扣除了 ${Math.abs(pts)} 代幣`;
+      document.getElementById('systemLog').innerText = `系統紀錄：剛才成功${action}！`;
+    }
+
+    function drawCard() {
+      const data = users[currentUser];
+      
+      if (data.coins >= 50) {
+        data.coins -= 50;
+        data.pulls += 1;
+        
+        const keys = Object.keys(pokemonDB);
+        const randomId = keys[Math.floor(Math.random() * keys.length)];
+        const poke = pokemonDB[randomId];
+        
+        let isDuplicate = false;
+        if (!data.cards[randomId]) {
+          data.cards[randomId] = 1; 
+        } else {
+          isDuplicate = true;
+          data.coins += 30; 
+        }
+        
+        updateUI();
+        saveGameData(); 
+
+        document.getElementById('resultImg').src = poke.img;
+        document.getElementById('resultName').innerText = poke.name + (isDuplicate ? ' (重複卡，退還30代幣)' : '');
+        document.getElementById('resultSkillName').innerText = poke.skills[0].name;
+        document.getElementById('resultSkillDesc').innerText = poke.skills[0].desc;
+        
+        document.getElementById('flipCard').classList.remove('is-flipped');
+        document.getElementById('clickHint').style.display = 'block';
+        document.getElementById('closeDrawBtn').style.display = 'none';
+        document.getElementById('drawModal').classList.add('active');
+        isFlipping = false;
+      } else {
+        alert('代幣不足 50 點喔！快去完成任務吧！');
+      }
+    }
+
+    function flipTheCard() {
+      if (isFlipping) return;
+      isFlipping = true;
+      document.getElementById('flipCard').classList.add('is-flipped');
+      document.getElementById('clickHint').style.display = 'none';
+      setTimeout(() => document.getElementById('closeDrawBtn').style.display = 'block', 800);
+    }
+
+    function closeDrawModal() {
+      document.getElementById('drawModal').classList.remove('active');
+    }
+    
+    function openAlbum() {
+      const data = users[currentUser];
+      document.getElementById('albumTitle').innerText = data.name + '的收集冊';
+      
+      const grid = document.getElementById('albumGrid');
+      grid.innerHTML = '';
+      
+      const ownedKeys = Object.keys(data.cards);
+      if (ownedKeys.length === 0) {
+        grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #8A7B9D; padding: 30px; font-weight: bold;">目前還沒有寶可夢喔，快去幫忙做任務抽卡吧！</div>';
+      } else {
+        ownedKeys.forEach(id => {
+          const poke = pokemonDB[id];
+          const level = data.cards[id];
+          const isMax = level === poke.skills.length;
+          
+          grid.innerHTML += `
+            <div class="album-item" onclick="openUpgradePanel('${id}')">
+              <div class="lv-badge" style="${isMax ? 'background:#8A7B9D; color:white;' : ''}">Lv.${isMax ? 'Max' : level}</div>
+              <img src="${poke.img}">
+              <span style="font-size: 13px; font-weight: bold; color: #3D3B4F;">${poke.name}</span>
+            </div>
+          `;
+        });
+      }
+      
+      document.getElementById('albumHome').style.display = 'flex';
+      document.getElementById('upgradePanel').style.display = 'none';
+      document.getElementById('albumOverlay').classList.add('active');
+    }
+
+    function closeAlbum() {
+      document.getElementById('albumOverlay').classList.remove('active');
+    }
+
+    function openUpgradePanel(id) {
+      currentViewCardId = id;
+      const data = users[currentUser];
+      const poke = pokemonDB[id];
+      const currentLevel = data.cards[id];
+      
+      const currentSkill = poke.skills[currentLevel - 1];
+      
+      document.getElementById('upgImg').src = poke.img;
+      document.getElementById('upgName').innerText = poke.name;
+      document.getElementById('upgCurrentSkill').innerText = currentSkill.name;
+      document.getElementById('upgCurrentDesc').innerText = currentSkill.desc;
+      
+      const actionBox = document.getElementById('upgradeActionBox');
+      
+      if (currentLevel < poke.skills.length) {
+        const nextSkill = poke.skills[currentLevel];
+        const canAfford = data.coins >= nextSkill.cost;
+        actionBox.innerHTML = `
+          <div style="font-size: 14px; font-weight: bold; color: #D96C75; margin-bottom: 5px;">⬇ 下一級進化預覽 ⬇</div>
+          <div style="background: white; border: 2px dashed #D96C75; border-radius: 12px; padding: 12px; text-align: left; margin-bottom: 15px;">
+            <div style="font-weight: 900; color: #3D3B4F; font-size: 16px;">${nextSkill.name}</div>
+            <div style="font-size: 13px; color: #666; margin-top: 5px; font-weight: bold;">${nextSkill.desc}</div>
+          </div>
+          <button class="btn-upgrade" ${canAfford ? '' : 'disabled'} onclick="buyUpgrade()">
+            ⬆ 花費 ${nextSkill.cost} 代幣升級技能 ⬆
+          </button>
+          ${!canAfford ? `<div style="font-size:12px; color:#D96C75; margin-top:5px; font-weight:bold;">代幣餘額不足，快去幫忙做任務吧！</div>` : ''}
+        `;
+      } else {
+        actionBox.innerHTML = `
+          <div style="background: #FFF1CD; border: 3px solid #FFD700; border-radius: 12px; padding: 15px; font-size: 16px; font-weight: 900; color: #3D3B4F;">
+            ⭐ 此寶可夢技能已達最高等級！⭐
+          </div>
+        `;
+      }
+      
+      document.getElementById('albumHome').style.display = 'none';
+      document.getElementById('upgradePanel').style.display = 'flex';
+    }
+
+    function buyUpgrade() {
+      const data = users[currentUser];
+      const poke = pokemonDB[currentViewCardId];
+      const currentLevel = data.cards[currentViewCardId];
+      const nextSkill = poke.skills[currentLevel];
+      
+      if (data.coins >= nextSkill.cost) {
+        data.coins -= nextSkill.cost;
+        data.cards[currentViewCardId] += 1; 
+        updateUI();
+        saveGameData(); 
+        
+        alert(`🎉 升級成功！${poke.name} 掌握了「${nextSkill.name}」！`);
+        openUpgradePanel(currentViewCardId); 
+      }
+    }
+
+    function backToAlbum() {
+      openAlbum(); 
+    }
+
+    // 啟動時預設載入大寶資料並同步最新UI狀態
+    switchUser('child1');
+  </script>
+
+</body>
+</html>
